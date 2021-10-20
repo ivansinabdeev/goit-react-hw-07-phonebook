@@ -1,8 +1,8 @@
 import axios from "axios";
 import {
-  fetchContactsRequest,
-  fetchContactsSuccess,
-  fetchContactsError,
+  fetchContactRequest,
+  fetchContactSuccess,
+  fetchContactError,
   addContactRequest,
   addContactSuccess,
   addContactError,
@@ -11,47 +11,39 @@ import {
   deleteContactError,
 } from "./phonebook-actions";
 
-axios.defaults.baseURL = "http://localhost:3000";
+axios.defaults.baseURL = "http://localhost:3001";
 
-const fetchContacts = () => async (dispatch) => {
-  dispatch(fetchContactsRequest());
+export const fetchContacts = () => async (dispatch) => {
+  dispatch(fetchContactRequest);
+
   try {
     const { data } = await axios.get("/contacts");
-    dispatch(fetchContactsSuccess(data));
+    dispatch(fetchContactSuccess(data));
   } catch (error) {
-    dispatch(fetchContactsError(error));
+    dispatch(fetchContactError(error));
   }
 };
 
-const addContact = (name, number) => async (dispatch) => {
-  const contact = {
-    name,
-    number,
+export const addContact =
+  ({ name, number }) =>
+  (dispatch) => {
+    const contact = {
+      name,
+      number,
+    };
+
+    dispatch(addContactRequest());
+
+    axios
+      .post("/contacts", contact)
+      .then(({ data }) => dispatch(addContactSuccess(data)))
+      .catch((error) => dispatch(addContactError(error)));
   };
 
-  dispatch(addContactRequest());
-
-  try {
-    const { data } = await axios.post("/contacts", contact);
-    dispatch(addContactSuccess(data));
-  } catch (error) {
-    dispatch(addContactError(error));
-  }
-};
-
-const deleteContact = (id) => async (dispatch) => {
+export const deleteContact = (contactID) => (dispatch) => {
   dispatch(deleteContactRequest());
-  try {
-    await axios.delete(`/contacts/${id}`);
-    dispatch(deleteContactSuccess(id));
-  } catch (error) {
-    dispatch(deleteContactError(error));
-  }
+  axios
+    .delete(`/contacts/${contactID}`)
+    .then(() => dispatch(deleteContactSuccess(contactID)))
+    .catch((error) => dispatch(deleteContactError(error)));
 };
-
-const contactsOperations = {
-  fetchContacts,
-  addContact,
-  deleteContact,
-};
-export default contactsOperations;
