@@ -1,17 +1,16 @@
-import { createSelector } from "@reduxjs/toolkit";
+import { createSelector } from "reselect";
 
 export const getContacts = (state) => state.contacts.items;
-
 export const getFilterValue = (state) => state.contacts.filter;
+export const isContactLoading = (state) => state.contacts.loading;
 
-export const getFilteredContactList = createSelector(
+export const getVisibleContacts = createSelector(
   [getContacts, getFilterValue],
-  (allContacts, filter) => {
-    const regExp = new RegExp(filter, "gi");
+  (contacts, filter) => {
+    const normalizedFilter = filter.toLowerCase();
 
-    if (filter) {
-      return allContacts.filter((contact) => regExp.test(contact.name));
-    }
-    return allContacts;
+    return contacts.filter((contact) =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
   }
 );

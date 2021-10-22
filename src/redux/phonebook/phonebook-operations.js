@@ -1,30 +1,28 @@
 import axios from "axios";
+
 import {
-  fetchContactRequest,
-  fetchContactSuccess,
-  fetchContactError,
   addContactRequest,
   addContactSuccess,
   addContactError,
   deleteContactRequest,
   deleteContactSuccess,
   deleteContactError,
+  fetchContactsRequest,
+  fetchContactsSuccess,
+  fetchContactsError,
 } from "./phonebook-actions";
 
-axios.defaults.baseURL = "http://localhost:3001";
+axios.defaults.baseURL = "http://localhost:3000";
 
-export const fetchContacts = () => async (dispatch) => {
-  dispatch(fetchContactRequest);
-
-  try {
-    const { data } = await axios.get("/contacts");
-    dispatch(fetchContactSuccess(data));
-  } catch (error) {
-    dispatch(fetchContactError(error));
-  }
+const fetchContacts = () => (dispatch) => {
+  dispatch(fetchContactsRequest());
+  axios
+    .get("/contacts")
+    .then(({ data }) => dispatch(fetchContactsSuccess(data)))
+    .catch((error) => dispatch(fetchContactsError(error)));
 };
 
-export const addContact =
+const addContact =
   ({ name, number }) =>
   (dispatch) => {
     const contact = {
@@ -40,10 +38,18 @@ export const addContact =
       .catch((error) => dispatch(addContactError(error)));
   };
 
-export const deleteContact = (contactID) => (dispatch) => {
+const deleteContact = (contactId) => (dispatch) => {
   dispatch(deleteContactRequest());
+
   axios
-    .delete(`/contacts/${contactID}`)
-    .then(() => dispatch(deleteContactSuccess(contactID)))
+    .delete(`/contacts/${contactId}`)
+    .then(({ data }) => dispatch(deleteContactSuccess(contactId)))
     .catch((error) => dispatch(deleteContactError(error)));
+};
+
+// eslint-disable-next-line
+export default {
+  fetchContacts,
+  addContact,
+  deleteContact,
 };

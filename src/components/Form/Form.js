@@ -1,76 +1,81 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import contactsOperations from "../../redux/phonebook/phonebook-operations";
 import { getContacts } from "../../redux/phonebook/phonebook-selectors";
-import { addContact } from "../../redux/phonebook/phonebook-operations";
-
 import s from "./Form.module.css";
 
-function ContactForm() {
+export default function ContactForm() {
   const contacts = useSelector(getContacts);
   const dispatch = useDispatch();
-  const onSubmit = (name, number) => dispatch(addContact(name, number));
 
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
 
-  const contactCheck = () => {
-    const namesIsIn = contacts.reduce(
-      (acc, contact) => [...acc, contact.name],
-      []
-    );
-    const numbersIsIn = contacts.reduce(
-      (acc, contact) => [...acc, contact.number],
-      []
-    );
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-    if (namesIsIn.includes(name) || numbersIsIn.includes(number)) {
-      alert(`${name}${number} Already exist`);
-    }
+    switch (name) {
+      case "name":
+        setName(value);
+        break;
 
-    if (name === "" || number === "") {
-      alert("Not enough data");
+      case "number":
+        setNumber(value);
+        break;
+
+      default:
+        return;
     }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setName("");
-    setNumber("");
-    if (contactCheck()) {
+  const findByName = (contactName) => {
+    return contacts.some(({ name }) => name === contactName);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (findByName(name)) {
+      alert(`${name} is already in contacts!`);
       return;
     }
 
-    onSubmit(name, number);
+    dispatch(contactsOperations.addContact({ name, number }));
+
+    setName("");
+    setNumber("");
   };
 
   return (
-    <form className={s.addContact} onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className={s.addContact}>
       <label>
-        Name:
+        Name
         <input
           type="text"
           name="name"
+          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
+          required
           value={name}
-          placeholder="Вася Пупкин"
-          onChange={(event) => setName(event.currentTarget.value)}
+          onChange={handleChange}
         />
       </label>
-
       <label>
-        Number:
+        Number
         <input
           type="tel"
           name="number"
+          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+          title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
+          required
           value={number}
-          placeholder="+123456789"
-          onChange={(event) => setNumber(event.currentTarget.value)}
+          onChange={handleChange}
         />
       </label>
-      <button className={s.button} type="submit">
+
+      <button type="submit" className={s.button}>
         Add contact
       </button>
     </form>
   );
 }
-
-export default ContactForm;

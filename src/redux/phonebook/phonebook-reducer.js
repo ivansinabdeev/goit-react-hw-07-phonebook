@@ -7,47 +7,37 @@ import {
   deleteContactRequest,
   deleteContactSuccess,
   deleteContactError,
-  fetchContactRequest,
-  fetchContactSuccess,
-  fetchContactError,
+  fetchContactsRequest,
+  fetchContactsSuccess,
+  fetchContactsError,
   changeFilter,
-} from "../phonebook/phonebook-actions";
+} from "./phonebook-actions";
 
 const items = createReducer([], {
-  [fetchContactSuccess]: (state, { payload }) => payload,
+  [fetchContactsSuccess]: (_, { payload }) => payload,
   [addContactSuccess]: (state, { payload }) => [...state, payload],
   [deleteContactSuccess]: (state, { payload }) =>
     state.filter(({ id }) => id !== payload),
 });
 
 const loading = createReducer(false, {
-  [fetchContactRequest]: () => true,
-  [fetchContactSuccess]: () => false,
-  [fetchContactError]: () => false,
+  [fetchContactsRequest]: () => true,
+  [fetchContactsSuccess]: () => false,
+  [fetchContactsError]: () => false,
   [addContactRequest]: () => true,
   [addContactSuccess]: () => false,
-  [addContactError]: () => true,
+  [addContactError]: () => false,
   [deleteContactRequest]: () => true,
   [deleteContactSuccess]: () => false,
   [deleteContactError]: () => false,
 });
 
 const filter = createReducer("", {
-  [changeFilter]: (state, { payload }) => payload,
-});
-
-const error = createReducer(null, {
-  [fetchContactError]: (_, action) => action.payload,
-  [fetchContactRequest]: () => null,
-  [addContactRequest]: () => null,
-  [deleteContactRequest]: () => null,
-  [deleteContactError]: (_, action) => action.payload,
-  [addContactError]: (_, action) => action.payload,
+  [changeFilter]: (_, { payload }) => payload,
 });
 
 export default combineReducers({
   items,
   filter,
   loading,
-  error,
 });
